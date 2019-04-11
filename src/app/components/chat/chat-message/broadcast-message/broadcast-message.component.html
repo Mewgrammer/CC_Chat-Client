@@ -1,0 +1,20 @@
+<div class="animated alert"
+     style="min-width: 30%"
+     [class.alert-success]="chatService.isCurrentUser(message.sender)"
+     [class.float-right]="chatService.isCurrentUser(message.sender)"
+     [class.bounceInLeft]="!chatService.isCurrentUser(message.sender) && !message.read"
+     [class.alert-secondary]="!chatService.isCurrentUser(message.sender)"
+     [class.float-left]="!chatService.isCurrentUser(message.sender)">
+  <div mat-line class="w-100 ml-auto mr-auto text-center" *ngIf="!chatService.isCurrentUser(message.sender)">
+    <b>{{message.sender.name}}</b>
+  </div>
+  <div mat-line>
+    <span>
+      {{message.content}}
+    </span>
+    <app-message-attachments *ngIf="message.attachments.length > 0" [message]="message"></app-message-attachments>
+  </div>
+  <div mat-line  style="font-size: 10px">
+    <span class="pl-5 float-right justify-content-end"> {{message.timeStamp | date:'medium'}} </span>
+  </div>
+</div>

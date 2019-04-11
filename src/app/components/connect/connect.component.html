@@ -1,0 +1,29 @@
+<mat-card>
+  <mat-card-title>
+    Please Enter the Chat-Server Address
+  </mat-card-title>
+  <mat-card-content>
+    <form (ngSubmit)="onSubmit()">
+      <div class="row">
+        <mat-form-field class="ml-2 w-50 ml-auto mr-auto">
+          <input matInput
+                 type="url"
+                 name="serverUrl"
+                 placeholder="Server-Url"
+                 [(ngModel)]="serverUrl"
+                 (keyup.enter)="connect(serverUrl)"
+                 required>
+        </mat-form-field>
+
+      </div>
+      <div class="row" *ngIf="ErrorMessage.length > 0">
+          <span class="ml-auto mr-auto text-danger" >
+            {{ErrorMessage}}
+          </span>
+      </div>
+      <div class="row">
+        <button mat-raised-button type="submit" color="primary" class="ml-auto mr-auto justify-content-center w-25"> Connect  </button>
+      </div>
+    </form>
+  </mat-card-content>
+</mat-card>

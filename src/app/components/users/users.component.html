@@ -1,0 +1,18 @@
+
+<mat-card>
+  <mat-card-title>
+    Users
+  </mat-card-title>
+  <mat-card-content>
+    <mat-list>
+      <mat-list-item class="mat-elevation-z1" *ngFor="let user of users">
+        <p mat-line>
+          <mat-icon *ngIf="user.id === chatService.User.id">
+            perm_identity
+          </mat-icon>
+          {{user.name}}
+        </p>
+      </mat-list-item>
+    </mat-list>
+  </mat-card-content>
+</mat-card>

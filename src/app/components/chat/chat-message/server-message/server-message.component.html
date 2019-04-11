@@ -1,0 +1,14 @@
+<div 
+    class="alert alert-primary justify-content-center ml-auto mr-auto w-25"
+    style="min-width: 20%; max-width: 50%"
+  >
+  <div mat-line class="w-100 ml-auto mr-auto text-center" *ngIf="message.sender.name == chatService.Username">
+    <b>{{message.sender.name}}</b>
+  </div>
+  <div mat-line>
+    <span>
+      {{message.content}}
+    </span>
+    <app-message-attachments *ngIf="message.attachments.length > 0" [message]="message"></app-message-attachments>
+  </div>
+</div>

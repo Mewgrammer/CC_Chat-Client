@@ -1,0 +1,13 @@
+
+<div class="alert alert-dark" style="min-width: 30%"  *ngFor="let attachment of message.attachments">
+  <div class="row">
+    <div class="col-10">
+      {{attachment.displayName}}
+    </div>
+    <div class="col-2">
+      <button mat-icon-button class="float-right" (click)="onDownloadAttachment(attachment)">
+        <mat-icon>save_alt</mat-icon>
+      </button>
+    </div>
+  </div>
+</div>

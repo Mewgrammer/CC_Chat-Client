@@ -1,0 +1,54 @@
+<div class="w-100 h-100">
+  <mat-toolbar class="w-100" color="primary">
+    <div class="w-100">
+      <div class="row w-100">
+        <div class="col-10">
+        <button mat-icon-button *ngIf="chatService.LoggedIn" color="primary" class="justify-content-start float-left text-white ml-2" (click)="onToggleSideNav()">
+          <mat-icon>menu</mat-icon>
+        </button>
+        <span class="ml-2 justify-content-between float-left">Chat App</span>
+        </div>
+        <div class="col-2">
+          <span class="justify-content-end float-right" *ngIf="chatService.LoggedIn">Logged in as {{chatService.Username}}</span>
+        </div>
+      </div>
+    </div>
+  </mat-toolbar>
+
+  <mat-sidenav-container>
+    <mat-sidenav #snav mode="side">
+      <mat-nav-list>
+          <a mat-list-item
+           *ngFor="let room of rooms"
+           routerLink="."
+           (click)="onSelectRoom(room)"
+           [class.bg-mat-primary]="chatService.CurrentChatRoom != null && chatService.CurrentChatRoom.name == room.name"
+           [class.text-white]="chatService.CurrentChatRoom != null && chatService.CurrentChatRoom.name == room.name"
+           >
+          {{room.name}}
+          </a>
+      </mat-nav-list>
+    </mat-sidenav>
+    <mat-sidenav-content>
+      <div *ngIf="!chatService.Connected" class="container-fluid row mt-2">
+        <div class="container">
+          <app-connect></app-connect>
+        </div>
+      </div>
+      <div *ngIf="chatService.Connected && !chatService.LoggedIn" class="container-fluid row mt-2">
+        <div class="container">
+          <app-login></app-login>
+        </div>
+      </div>
+      <div *ngIf="chatService.LoggedIn" class="container-fluid row mt-2 h-100 overflow-hidden">
+        <div class="col-9" *ngIf="chatService.CurrentChatRoom != null">
+          <app-chat class="mat-elevation-z9 overflow-auto" [chatRoom]="chatService.CurrentChatRoom"></app-chat>
+        </div>
+        <div class="col-3">
+          <app-users class="mat-elevation-z9"></app-users>
+        </div>
+      </div>
+    </mat-sidenav-content>
+  </mat-sidenav-container>
+
+</div>

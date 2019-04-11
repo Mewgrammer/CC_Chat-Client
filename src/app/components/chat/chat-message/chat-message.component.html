@@ -1,0 +1,6 @@
+<div mat-line class="w-100" [ngSwitch]="message.type">
+  <app-broadcast-message *ngSwitchCase="MessageTypes.broadcast" [message]="message"></app-broadcast-message>
+  <app-private-message   *ngSwitchCase="MessageTypes.private"   [message]="message"></app-private-message>
+  <app-server-message    *ngSwitchCase="MessageTypes.server"    [message]="message"></app-server-message>
+</div>
+
