@@ -1,0 +1,4 @@
+applications:
+  - name: cc-chat-client
+    memory: 2048M
+    host: mew-server
