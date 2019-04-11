@@ -1,6 +1,6 @@
 applications:
   - name: cc-chat-client
     memory: 256M
-    host: mew-server
+    host: mew-client
     buildpack: staticfile_buildpack
 
