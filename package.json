@@ -23,6 +23,8 @@
     "@angular/platform-browser": "~7.2.0",
     "@angular/platform-browser-dynamic": "~7.2.0",
     "@angular/router": "~7.2.0",
+    "@fortawesome/fontawesome": "^1.1.8",
+    "@fortawesome/fontawesome-free": "^5.8.1",
     "@types/socket.io": "~2.1.2",
     "animate.css": "^3.7.0",
     "bootstrap": "^4.3.1",

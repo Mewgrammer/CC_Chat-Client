@@ -11,6 +11,7 @@ export interface IMessage {
   sender: IUser;
   content: string;
   type: MessageType;
+  mood?: string;
   recipients: IUser[];
   attachments: UploadedFile[];
 }
@@ -18,7 +19,13 @@ export interface IMessage {
 export class Message implements IMessage {
   public timeStamp: Date;
   public read = false;
-  constructor(public sender: User, public content: string, public type: MessageType = MessageType.broadcast, public recipients: User[] = [], public attachments: UploadedFile[] = []) {
+  constructor(public sender: IUser,
+              public content: string,
+              public type: MessageType = MessageType.broadcast,
+              public recipients: IUser[] = [],
+              public attachments: UploadedFile[] = [],
+              public mood?: string)
+  {
     this.timeStamp = new Date();
   }
 }
