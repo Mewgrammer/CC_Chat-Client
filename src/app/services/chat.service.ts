@@ -18,7 +18,7 @@ export class ChatService{
   private _user: User = null;
   private _loggedIn = false;
   private _socket: SocketIOClient.Socket;
-  private _serverUrl = "https://mew-server.eu-de.mybluemix.net/";
+  private _serverUrl = "https://mew-server.eu-de.mybluemix.net";
 
   public currentRoomChanged: Subject<ChatRoom>;
   public userNameChanged: Subject<string>;

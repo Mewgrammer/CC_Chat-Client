@@ -67,7 +67,7 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewInit, AfterVie
 
   async sendMessage(message: string) {
     console.log("Sending Message", message);
-    if (message.length > 0) {
+    if (message.length > 0 || this.files.length > 0) {
       let attachments: UploadedFile[] = [];
       if(this.files.length > 0) {
         attachments = await this.chatService.uploadFiles(this.files);
