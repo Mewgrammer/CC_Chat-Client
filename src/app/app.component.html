@@ -9,7 +9,9 @@
         <span class="ml-2 justify-content-between float-left">Chat App</span>
         </div>
         <div class="col-2">
-          <span class="justify-content-end float-right" *ngIf="chatService.LoggedIn">Logged in as {{chatService.Username}}</span>
+          <button mat-flat-button *ngIf="chatService.LoggedIn" (click)="logout()">Logout</button>
+          <button mat-flat-button *ngIf="!chatService.LoggedIn && chatService.Connected" (click)="switchServer()">Switch Server</button>
+          <i *ngIf="!chatService.Connected" class="text-danger fas fa-plug"></i>
         </div>
       </div>
     </div>
@@ -30,7 +32,7 @@
       </mat-nav-list>
     </mat-sidenav>
     <mat-sidenav-content>
-      <div *ngIf="!chatService.Connected" class="container-fluid row mt-2">
+      <div *ngIf="!chatService.Connected && !chatService.Connecting" class="container-fluid row mt-2">
         <div class="container">
           <app-connect></app-connect>
         </div>

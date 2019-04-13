@@ -5,7 +5,7 @@ import {Message, MessageType} from '../Models/message';
 import {LoginPayload, MessagePayload, JoinPayload, ChatRoomChangePayload} from '../Models/payloads';
 import * as io from 'socket.io-client';
 import {User} from '../Models/user';
-import {HttpClient} from '@angular/common/http';
+import {HttpClient, HttpErrorResponse} from '@angular/common/http';
 import {UploadedFile} from '../Models/uploaded-file';
 
 @Injectable({
@@ -18,6 +18,7 @@ export class ChatService{
   private _user: User = null;
   private _loggedIn = false;
   private _socket: SocketIOClient.Socket;
+  private _connecting = false;
   private _serverUrl = "https://mew-server.eu-de.mybluemix.net";
 
   public currentRoomChanged: Subject<ChatRoom>;
@@ -36,6 +37,9 @@ export class ChatService{
   public get Connected() {
     return this._socket != null && this._socket.connected;
   }
+  public  get Connecting() {
+    return this._connecting;
+  }
   public get CurrentChatRoom() {
     return this._currentChatRoom == null ? null : {...this._currentChatRoom};
   }
@@ -50,7 +54,7 @@ export class ChatService{
     return this._user.name;
   }
   public get LoggedIn() {
-    return this.Connected && this._user != null && this.Username.length > 0 && this._loggedIn;
+    return (this.Connected || this.Connecting) && this._user != null && this.Username.length > 0 && this._loggedIn;
   }
 
   constructor(private http: HttpClient) {
@@ -62,14 +66,27 @@ export class ChatService{
     this.registrationFailed = new Subject<string>();
     this.connectionLost = new Subject<void>();
     this.connectionEstablished = new Subject<void>();
-    // this.connect(this._serverUrl);
+    const serverUrl = localStorage.getItem("server-url");
+    if(serverUrl != null && serverUrl != "") {
+      this._serverUrl = serverUrl;
+    }
+    this.connect(this._serverUrl);
   }
 
   public connect (serverUrl: string) {
     console.log("Connecting to ChatServer on ", serverUrl);
     this._serverUrl = serverUrl;
+    localStorage.setItem("server-url", serverUrl);
     this._socket = io(this._serverUrl);
     this.initEventListeners();
+  }
+
+  disconnect() {
+    console.log("Disconnecting from ChatServer on ", this._serverUrl);
+    this._socket.disconnect();
+    this._socket.close();
+    this._socket = null;
+    this._connecting = false;
   }
 
   public isCurrentUser(user: User) {
@@ -147,6 +164,44 @@ export class ChatService{
 
   private configureSocketIOConnection() {
     this._socket.emit("configure", this._user.id);
+  }
+
+  public async autoLogin() {
+    console.log("Auto-Login");
+    const url = this._serverUrl + "/login";
+    try {
+      const payload = (await this.http.post(url, JSON.stringify({}), {
+        headers: { 'Content-Type': 'application/json' },
+      }).toPromise()) as LoginPayload;
+      console.log("Logged-In", payload);
+      this._user = payload.user;
+      this.configureSocketIOConnection();
+      this._loggedIn = true;
+      this._chatRooms = [...payload.chatRooms];
+      this.onChatRoomsUpdated([...this._chatRooms]);
+      if(this._chatRooms.length > 0) {
+        this.changeChatRoom(this._chatRooms[0]);
+      }
+    }
+    catch (e) {
+      console.warn("Auto-Login Failed :", e);
+      this._loggedIn = false;
+    }
+  }
+
+  public async logout() {
+    console.log("Logout");
+    const url = this._serverUrl + "/logout";
+    try {
+      await this.http.post(url, JSON.stringify({}), {
+        headers: { 'Content-Type': 'application/json' },
+      }).toPromise();
+      this._loggedIn = false;
+    }
+    catch (e) {
+      console.warn("Logout Failed :", e);
+      this._loggedIn = false;
+    }
   }
 
   public async login(username: string, password: string) {
@@ -231,5 +286,6 @@ export class ChatService{
       this._chatRooms = rooms;
       this.chatRoomsChanged.next(rooms);
   }
+
 
 }

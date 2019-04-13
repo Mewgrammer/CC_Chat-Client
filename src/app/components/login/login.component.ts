@@ -34,9 +34,13 @@ export class LoginComponent implements OnInit {
     );
     this.connectionEstablishedSubscription = this.chatService.connectionEstablished.subscribe(
       () => {
+        this.chatService.autoLogin();
         this.errorMsg = "";
       }
     );
+    if(this.chatService.Connected) {
+      this.chatService.autoLogin();
+    }
   }
 
   async onSubmit() {

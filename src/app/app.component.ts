@@ -39,4 +39,11 @@ export class AppComponent {
     this.chatService.changeChatRoom(room);
   }
 
+  logout() {
+    this.chatService.logout();
+  }
+
+  switchServer() {
+    this.chatService.disconnect();
+  }
 }
