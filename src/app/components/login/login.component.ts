@@ -9,6 +9,7 @@ import {Subscription} from 'rxjs';
 })
 export class LoginComponent implements OnInit {
   private username = "";
+  private password = ""
   private errorMsg = "";
   private loginRefusedSubscription: Subscription;
   private connectionLostSubscription: Subscription;
@@ -38,12 +39,12 @@ export class LoginComponent implements OnInit {
     );
   }
 
-  onSubmit() {
+  async onSubmit() {
     this.errorMsg = "";
-    this.login(this.username);
+    await this.login(this.username, this.password);
   }
 
-  login(username: string) {
-    this.chatService.login(username);
+  async login(username: string, password: string) {
+    await this.chatService.login(username, password);
   }
 }

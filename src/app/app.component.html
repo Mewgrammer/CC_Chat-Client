@@ -37,7 +37,18 @@
       </div>
       <div *ngIf="chatService.Connected && !chatService.LoggedIn" class="container-fluid row mt-2">
         <div class="container">
-          <app-login></app-login>
+          <mat-tab-group>
+            <mat-tab label="Login">
+              <div class="container">
+                <app-login></app-login>
+              </div>
+            </mat-tab>
+            <mat-tab label="Register">
+              <div class="container">
+                <app-register></app-register>
+              </div>
+            </mat-tab>
+          </mat-tab-group>
         </div>
       </div>
       <div *ngIf="chatService.LoggedIn" class="container-fluid row mt-2 h-100 overflow-hidden">

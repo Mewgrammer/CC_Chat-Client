@@ -5,7 +5,7 @@
   "author": "Michael Mew, Andreas Natter",
   "scripts": {
     "ng": "ng",
-    "start": "ng serve --host 0.0.0.0 --port 80 --disableHostCheck",
+    "start": "ng serve --host 0.0.0.0 --port 80",
     "build": "ng build && cpx manifest.yml dist",
     "test": "ng test",
     "lint": "ng lint",
