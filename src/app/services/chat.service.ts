@@ -171,6 +171,7 @@ export class ChatService{
     const url = this._serverUrl + "/login";
     try {
       const payload = (await this.http.post(url, JSON.stringify({}), {
+        withCredentials: true,
         headers: { 'Content-Type': 'application/json' },
       }).toPromise()) as LoginPayload;
       console.log("Logged-In", payload);
@@ -194,6 +195,7 @@ export class ChatService{
     const url = this._serverUrl + "/logout";
     try {
       await this.http.post(url, JSON.stringify({}), {
+        withCredentials: true,
         headers: { 'Content-Type': 'application/json' },
       }).toPromise();
       this._loggedIn = false;
@@ -213,6 +215,7 @@ export class ChatService{
     const url = this._serverUrl + "/login";
     try {
       const payload = (await this.http.post(url, JSON.stringify(body), {
+        withCredentials: true,
         headers: { 'Content-Type': 'application/json' },
       }).toPromise()) as LoginPayload;
       console.log("Logged-In", payload);
@@ -243,6 +246,7 @@ export class ChatService{
     const url = this._serverUrl + "/register";
     try {
       const user = await this.http.post(url, JSON.stringify(body), {
+        withCredentials: true,
         headers: { 'Content-Type': 'application/json' },
       }).toPromise();
       console.log("Registered", user);
