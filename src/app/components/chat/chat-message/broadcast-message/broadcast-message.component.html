@@ -7,8 +7,6 @@
      [class.float-left]="!chatService.isCurrentUser(message.sender)">
   <div mat-line class="w-100 ml-auto mr-auto text-center" *ngIf="!chatService.isCurrentUser(message.sender)">
     <b>{{message.sender.name}}</b>&nbsp;&nbsp;
-    <i *ngIf="isHappy()" class="far fa-laugh-beam" ></i>
-    <i *ngIf="!isHappy()" class="far fa-sad-cry"></i>
   </div>
   <div mat-line>
     <span>

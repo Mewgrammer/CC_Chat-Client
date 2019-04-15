@@ -17,10 +17,6 @@ export class BroadcastMessageComponent implements OnInit {
 
   constructor(protected chatService: ChatService) { }
 
-  public isHappy(): boolean {
-    return this.message != null && this.message.mood == "happy";
-  }
-
   ngOnInit() {
   }
 

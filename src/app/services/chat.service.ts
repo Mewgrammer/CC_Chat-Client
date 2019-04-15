@@ -2,7 +2,7 @@ import {Injectable} from '@angular/core';
 import {ChatRoom} from '../Models/chat-room';
 import {Subject} from 'rxjs';
 import {Message, MessageType} from '../Models/message';
-import {LoginPayload, MessagePayload, JoinPayload, ChatRoomChangePayload} from '../Models/payloads';
+import {LoginPayload, MessagePayload, JoinPayload, ChatRoomChangePayload, MoodPayload} from '../Models/payloads';
 import * as io from 'socket.io-client';
 import {User} from '../Models/user';
 import {HttpClient, HttpErrorResponse} from '@angular/common/http';
@@ -144,6 +144,18 @@ export class ChatService{
       this._currentChatRoom = chatRoom;
       this._currentChatRoom.messages.forEach(msg => msg.read = true);
       this.currentRoomChanged.next(chatRoom);
+    });
+    this._socket.on("moodChanged", (payload: MoodPayload) => {
+      console.log("Mood Changed", payload.newMood);
+      if(payload.userId == this.User.id) {
+        this._user.mood = payload.newMood;
+      }
+      const user = this._currentChatRoom.users.find(u => u.id === payload.userId);
+      if(user) {
+        user.mood = payload.newMood;
+        this.currentRoomChanged.next(this.CurrentChatRoom);
+      }
+      console.log(this.CurrentChatRoom.users);
     });
     this._socket.on("chatroom-changed", (payload: ChatRoomChangePayload) => {
       console.log("ChatRoom changed!", payload);
