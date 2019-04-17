@@ -76,6 +76,9 @@ export class ChatService{
   public connect (serverUrl: string) {
     console.log("Connecting to ChatServer on ", serverUrl);
     this._serverUrl = serverUrl;
+    if(this._socket != null) {
+      this.disconnect();
+    }
     localStorage.setItem("server-url", serverUrl);
     this._socket = io(this._serverUrl);
     this.initEventListeners();
@@ -170,6 +173,9 @@ export class ChatService{
     });
     this._socket.on("handshake", (payload: any) => {
       console.log("Socket IO Server handshake complete", payload);
+      if(this._chatRooms.length > 0) {
+        this.changeChatRoom(this._chatRooms[0]);
+      }
     });
     console.log("Event-Listeners registered");
   }
@@ -192,9 +198,6 @@ export class ChatService{
       this._loggedIn = true;
       this._chatRooms = [...payload.chatRooms];
       this.onChatRoomsUpdated([...this._chatRooms]);
-      if(this._chatRooms.length > 0) {
-        this.changeChatRoom(this._chatRooms[0]);
-      }
     }
     catch (e) {
       console.warn("Auto-Login Failed :", e);
@@ -237,9 +240,9 @@ export class ChatService{
         this._loggedIn = true;
         this._chatRooms = [...payload.chatRooms];
         this.onChatRoomsUpdated([...this._chatRooms]);
-        if(this._chatRooms.length > 0) {
-          this.changeChatRoom(this._chatRooms[0]);
-        }
+      }
+      else {
+        console.error("Username mismatch !", this.User, payload);
       }
     }
     catch (e) {
@@ -306,6 +309,4 @@ export class ChatService{
       this._chatRooms = rooms;
       this.chatRoomsChanged.next(rooms);
   }
-
-
 }
