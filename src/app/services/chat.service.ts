@@ -249,7 +249,7 @@ export class ChatService{
     }
   }
 
-  public async register(username: string, password: string) {
+  public async register(username: string, password: string, profileImage: File) {
     const body = {
       name: username,
       password: password,
@@ -257,16 +257,20 @@ export class ChatService{
     console.log("register", body);
     const url = this._serverUrl + "/register";
     try {
-      const user = await this.http.post(url, JSON.stringify(body), {
+      const formData: FormData = new FormData();
+      if(profileImage)
+        formData.append('file', profileImage, profileImage.name);
+      formData.append('user', JSON.stringify(body));
+      const user = await this.http.post(url, formData, {
         withCredentials: true,
-        headers: { 'Content-Type': 'application/json' },
       }).toPromise();
+      console.log("Register Result", user);
       console.log("Registered", user);
       await this.login(username, password);
     }
     catch (e) {
       console.warn("Register Failed :", e);
-      this.registrationFailed.next("Registration failed");
+      this.registrationFailed.next("Registration failed - ");
     }
   }
 
