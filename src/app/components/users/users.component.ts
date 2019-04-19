@@ -30,7 +30,15 @@ export class UsersComponent implements OnInit {
     }
   }
 
+  public UserHasAvatar(user: IUser) {
+    return user.profilePictureLink != null && user.profilePictureLink != "";
+  }
+
+  public UserAvatarUrl(user: IUser) {
+    return this.chatService.ServerUrl + user.profilePictureLink;
+  }
+
   public getMoodIconClass(user: IUser) {
-    return user.mood == EMood.Unhappy ? "far fa-sad-cry text-danger" : user.mood == EMood.Happy ? "far fa-laugh-beam text-success" : "";
+    return (user.mood == EMood.Unhappy ? "far fa-sad-cry text-danger" : user.mood == EMood.Happy ? "far fa-laugh-beam text-success" : "");
   }
 }

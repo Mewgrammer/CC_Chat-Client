@@ -6,13 +6,14 @@
   <mat-card-content>
     <mat-list>
       <mat-list-item class="mat-elevation-z1" *ngFor="let user of users">
-        <p mat-line>
-          <mat-icon *ngIf="user.id === chatService.User.id">
-            perm_identity
-          </mat-icon>
-          {{user.name}}
-          <i class="{{getMoodIconClass(user)}}"></i>
-        </p>
+        <div class="row">
+          <img mat-card-avatar *ngIf="UserHasAvatar(user)" [src]="UserAvatarUrl(user)" height="35" width="35" [alt]="user.name"/>
+          <avatar mat-card-avatar *ngIf="!UserHasAvatar(user)" [name]="user.name" [displayType]="'circle'" [size]="35"></avatar>
+          <span [ngClass]="{'pl-2': true, 'font-weight-bold': chatService.isCurrentUser(user)}" style="font-size: 16px;">
+            {{user.name}}
+            <i class="text-right float-right justify-content-end {{getMoodIconClass(user)}}"></i>
+          </span>
+        </div>
       </mat-list-item>
     </mat-list>
   </mat-card-content>
