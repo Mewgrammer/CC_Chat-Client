@@ -12,7 +12,7 @@ import {
   MatListModule,
   MatSelectModule,
   MatToolbarModule,
-  MatSidenavModule
+  MatSidenavModule, MatTabsModule, MatTooltipModule
 } from '@angular/material';
 import {ChatComponent} from './components/chat/chat.component';
 import {RoomsComponent} from './components/rooms/rooms.component';
@@ -28,6 +28,8 @@ import { BroadcastMessageComponent } from './components/chat/chat-message/broadc
 import {HttpClientModule} from '@angular/common/http';
 import { MessageAttachmentsComponent } from './components/chat/chat-message/message-attachments/message-attachments.component';
 import { ConnectComponent } from './components/connect/connect.component';
+import { RegisterComponent } from './components/register/register.component';
+import {AvatarModule} from 'ng2-avatar';
 
 @NgModule({
   declarations: [
@@ -43,6 +45,7 @@ import { ConnectComponent } from './components/connect/connect.component';
     BroadcastMessageComponent,
     MessageAttachmentsComponent,
     ConnectComponent,
+    RegisterComponent,
   ],
   imports: [
     HttpClientModule,
@@ -50,9 +53,13 @@ import { ConnectComponent } from './components/connect/connect.component';
     BrowserModule,
     AppRoutingModule,
 
+    AvatarModule.forRoot(),
+
     // Angular Material
     ScrollingModule,
     MatToolbarModule,
+    MatTabsModule,
+    MatTooltipModule,
     MatButtonModule,
     MatSidenavModule,
     MatCheckboxModule,

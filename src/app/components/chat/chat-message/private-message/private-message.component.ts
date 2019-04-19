@@ -21,10 +21,6 @@ export class PrivateMessageComponent implements OnInit {
   ngOnInit() {
   }
 
-  public isHappy(): boolean {
-    return this.message != null && this.message.mood == "happy";
-  }
-
   public getRecipientsListAsString(): string {
     return this.message.recipients.map(r => r.name).join(",");
   }

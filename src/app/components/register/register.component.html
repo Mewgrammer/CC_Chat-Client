@@ -1,9 +1,16 @@
 <mat-card>
   <mat-card-title>
-    Login
+    Register a new User
   </mat-card-title>
   <mat-card-content>
     <form (ngSubmit)="onSubmit()">
+      <div class="row" style="margin-bottom: 8%;">
+        <button mat-icon-button type="button" [disableRipple]="true" class="ml-auto mr-auto justify-content-center" (click)="fileInput.click()">
+          <avatar class="" *ngIf="!file" [name]="username" [displayType]="'circle'" [size]="100"></avatar>
+          <img *ngIf="file" [src]="imgSrc" alt="Profile Image" style="border-radius: 50%; outline: none !important;" width="100" height="100" />
+        </button>
+        <input #fileInput type="file" (change)="onFileInput()" style="display: none" [multiple]="false" accept="image/*" />
+      </div>
       <div class="row">
         <mat-form-field class="ml-2 w-50 ml-auto mr-auto">
           <input matInput
@@ -33,7 +40,7 @@
           </span>
       </div>
       <div class="row">
-        <button mat-raised-button type="submit" color="primary" class="ml-auto mr-auto justify-content-center w-25"> Login  </button>
+        <button mat-raised-button type="submit" color="primary" class="ml-auto mr-auto justify-content-center w-25"> Register  </button>
       </div>
     </form>
   </mat-card-content>

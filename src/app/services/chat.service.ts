@@ -2,10 +2,10 @@ import {Injectable} from '@angular/core';
 import {ChatRoom} from '../Models/chat-room';
 import {Subject} from 'rxjs';
 import {Message, MessageType} from '../Models/message';
-import {LoginPayload, MessagePayload, JoinPayload, ChatRoomChangePayload} from '../Models/payloads';
+import {LoginPayload, MessagePayload, JoinPayload, ChatRoomChangePayload, MoodPayload} from '../Models/payloads';
 import * as io from 'socket.io-client';
 import {User} from '../Models/user';
-import {HttpClient} from '@angular/common/http';
+import {HttpClient, HttpErrorResponse} from '@angular/common/http';
 import {UploadedFile} from '../Models/uploaded-file';
 
 @Injectable({
@@ -18,6 +18,7 @@ export class ChatService{
   private _user: User = null;
   private _loggedIn = false;
   private _socket: SocketIOClient.Socket;
+  private _connecting = false;
   private _serverUrl = "https://mew-server.eu-de.mybluemix.net";
 
   public currentRoomChanged: Subject<ChatRoom>;
@@ -25,6 +26,7 @@ export class ChatService{
   public chatRoomsChanged: Subject<ChatRoom[]>;
   public chatRoomChanged: Subject<ChatRoom>;
   public loginRefused: Subject<string>;
+  public registrationFailed: Subject<string>;
 
   public connectionEstablished: Subject<void>;
   public connectionLost: Subject<void>;
@@ -34,6 +36,9 @@ export class ChatService{
   }
   public get Connected() {
     return this._socket != null && this._socket.connected;
+  }
+  public  get Connecting() {
+    return this._connecting;
   }
   public get CurrentChatRoom() {
     return this._currentChatRoom == null ? null : {...this._currentChatRoom};
@@ -49,7 +54,7 @@ export class ChatService{
     return this._user.name;
   }
   public get LoggedIn() {
-    return this.Connected && this._user != null && this.Username.length > 0 && this._loggedIn;
+    return (this.Connected || this.Connecting) && this._user != null && this.Username.length > 0 && this._loggedIn;
   }
 
   constructor(private http: HttpClient) {
@@ -58,16 +63,33 @@ export class ChatService{
     this.chatRoomChanged = new Subject<ChatRoom>();
     this.chatRoomsChanged = new Subject<ChatRoom[]>();
     this.loginRefused = new Subject<string>();
+    this.registrationFailed = new Subject<string>();
     this.connectionLost = new Subject<void>();
     this.connectionEstablished = new Subject<void>();
-    // this.connect(this._serverUrl);
+    const serverUrl = localStorage.getItem("server-url");
+    if(serverUrl != null && serverUrl != "") {
+      this._serverUrl = serverUrl;
+    }
+    this.connect(this._serverUrl);
   }
 
   public connect (serverUrl: string) {
     console.log("Connecting to ChatServer on ", serverUrl);
     this._serverUrl = serverUrl;
+    if(this._socket != null) {
+      this.disconnect();
+    }
+    localStorage.setItem("server-url", serverUrl);
     this._socket = io(this._serverUrl);
     this.initEventListeners();
+  }
+
+  disconnect() {
+    console.log("Disconnecting from ChatServer on ", this._serverUrl);
+    this._socket.disconnect();
+    this._socket.close();
+    this._socket = null;
+    this._connecting = false;
   }
 
   public isCurrentUser(user: User) {
@@ -121,15 +143,22 @@ export class ChatService{
       console.log("Socket Disconnected", x);
       this._socket = io("http://localhost:8080");
     });
-    this._socket.on("username-taken", (username: string) => {
-      console.log("Username taken:", username);
-      this._loggedIn = false;
-      this.loginRefused.next("Username '"+ username +"' is already taken");
-    });
     this._socket.on("join", (chatRoom: ChatRoom) => {
       this._currentChatRoom = chatRoom;
       this._currentChatRoom.messages.forEach(msg => msg.read = true);
       this.currentRoomChanged.next(chatRoom);
+    });
+    this._socket.on("moodChanged", (payload: MoodPayload) => {
+      console.log("Mood Changed", payload.newMood);
+      if(payload.userId == this.User.id) {
+        this._user.mood = payload.newMood;
+      }
+      const user = this._currentChatRoom.users.find(u => u.id === payload.userId);
+      if(user) {
+        user.mood = payload.newMood;
+        this.currentRoomChanged.next(this.CurrentChatRoom);
+      }
+      console.log(this.CurrentChatRoom.users);
     });
     this._socket.on("chatroom-changed", (payload: ChatRoomChangePayload) => {
       console.log("ChatRoom changed!", payload);
@@ -142,12 +171,8 @@ export class ChatService{
       });
       this.currentRoomChanged.next({...this._currentChatRoom});
     });
-    this._socket.on("logged-in", (payload: LoginPayload) => {
-      console.log("Logged In !", payload);
-      this._loggedIn = true;
-      this._user = payload.user;
-      this._chatRooms = [...payload.chatRooms];
-      this.onChatRoomsUpdated([...this._chatRooms]);
+    this._socket.on("handshake", (payload: any) => {
+      console.log("Socket IO Server handshake complete", payload);
       if(this._chatRooms.length > 0) {
         this.changeChatRoom(this._chatRooms[0]);
       }
@@ -155,8 +180,101 @@ export class ChatService{
     console.log("Event-Listeners registered");
   }
 
-  public login(username: string) {
-    this._socket.emit("login", username);
+  private configureSocketIOConnection() {
+    this._socket.emit("configure", this._user.id);
+  }
+
+  public async autoLogin() {
+    console.log("Auto-Login");
+    const url = this._serverUrl + "/login";
+    try {
+      const payload = (await this.http.post(url, JSON.stringify({}), {
+        withCredentials: true,
+        headers: { 'Content-Type': 'application/json' },
+      }).toPromise()) as LoginPayload;
+      console.log("Logged-In", payload);
+      this._user = payload.user;
+      this.configureSocketIOConnection();
+      this._loggedIn = true;
+      this._chatRooms = [...payload.chatRooms];
+      this.onChatRoomsUpdated([...this._chatRooms]);
+    }
+    catch (e) {
+      console.warn("Auto-Login Failed :", e);
+      this._loggedIn = false;
+    }
+  }
+
+  public async logout() {
+    console.log("Logout");
+    const url = this._serverUrl + "/logout";
+    try {
+      await this.http.post(url, JSON.stringify({}), {
+        withCredentials: true,
+        headers: { 'Content-Type': 'application/json' },
+      }).toPromise();
+      this._loggedIn = false;
+    }
+    catch (e) {
+      console.warn("Logout Failed :", e);
+      this._loggedIn = false;
+    }
+  }
+
+  public async login(username: string, password: string) {
+    const body = {
+      name: username,
+      password: password,
+    };
+    console.log("Login", body);
+    const url = this._serverUrl + "/login";
+    try {
+      const payload = (await this.http.post(url, JSON.stringify(body), {
+        withCredentials: true,
+        headers: { 'Content-Type': 'application/json' },
+      }).toPromise()) as LoginPayload;
+      console.log("Logged-In", payload);
+      if(payload.user.name === username) {
+        this._user = payload.user;
+        this.configureSocketIOConnection();
+        this._loggedIn = true;
+        this._chatRooms = [...payload.chatRooms];
+        this.onChatRoomsUpdated([...this._chatRooms]);
+      }
+      else {
+        console.error("Username mismatch !", this.User, payload);
+      }
+    }
+    catch (e) {
+      console.warn("Login Failed :", e);
+      this._loggedIn = false;
+      this.loginRefused.next("Login failed");
+    }
+  }
+
+  public async register(username: string, password: string, profileImage: File) {
+    const body = {
+      name: username,
+      password: password,
+    };
+    console.log("register", body);
+    const url = this._serverUrl + "/register";
+    try {
+      const formData: FormData = new FormData();
+      if(profileImage)
+        formData.append('file', profileImage, profileImage.name);
+      formData.append('user', JSON.stringify(body));
+      const user = await this.http.post(url, formData, {
+        withCredentials: true,
+      }).toPromise();
+      console.log("Register Result", user);
+      console.log("Registered", user);
+      await this.login(username, password);
+    }
+    catch (e) {
+      console.warn("Register Failed :", e);
+      this.registrationFailed.next("Registration failed - ");
+    }
   }
 
   public sendMessage(room: ChatRoom, message: string, attachments: UploadedFile[] = []) {
@@ -191,5 +309,4 @@ export class ChatService{
       this._chatRooms = rooms;
       this.chatRoomsChanged.next(rooms);
   }
-
 }
