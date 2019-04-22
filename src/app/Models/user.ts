@@ -11,7 +11,6 @@ export interface IUser {
   mood: EMood;
   language: string;
   profilePictureLink: string;
-
 }
 
 export class User implements IUser {
@@ -19,5 +18,6 @@ export class User implements IUser {
   public profilePictureLink: string;
   public language: string = "de";
   constructor(public id: string, public name: string, public password: string) {
+
   }
 }

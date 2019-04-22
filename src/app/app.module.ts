@@ -12,7 +12,7 @@ import {
   MatListModule,
   MatSelectModule,
   MatToolbarModule,
-  MatSidenavModule, MatTabsModule
+  MatSidenavModule, MatTabsModule, MatTooltipModule
 } from '@angular/material';
 import {ChatComponent} from './components/chat/chat.component';
 import {RoomsComponent} from './components/rooms/rooms.component';
@@ -30,6 +30,7 @@ import { MessageAttachmentsComponent } from './components/chat/chat-message/mess
 import { ConnectComponent } from './components/connect/connect.component';
 import { RegisterComponent } from './components/register/register.component';
 import { LanguagePickerComponent } from './components/language-picker/language-picker.component';
+import {AvatarModule} from 'ng2-avatar';
 
 @NgModule({
   declarations: [
@@ -54,10 +55,13 @@ import { LanguagePickerComponent } from './components/language-picker/language-p
     BrowserModule,
     AppRoutingModule,
 
+    AvatarModule.forRoot(),
+
     // Angular Material
     ScrollingModule,
     MatToolbarModule,
     MatTabsModule,
+    MatTooltipModule,
     MatButtonModule,
     MatSidenavModule,
     MatCheckboxModule,
