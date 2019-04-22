@@ -9,12 +9,15 @@ export interface IUser {
   name: string;
   password: string;
   mood: EMood;
+  language: string;
+  profilePictureLink: string;
+
 }
 
 export class User implements IUser {
-
-  public static _UserId: number = 0;
   public mood: EMood = EMood.Neutral;
+  public profilePictureLink: string;
+  public language: string = "de";
   constructor(public id: string, public name: string, public password: string) {
   }
 }
