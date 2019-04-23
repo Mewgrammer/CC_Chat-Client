@@ -1,3 +1,6 @@
 <mat-select>
-  <mat-option *ngFor="let lang of Languages" [value]="user">{{user.name}}</mat-option>
+  <mat-option *ngFor="let lang of languages" [(ngModel)]="language" (onSelectionChange)="onSelectionChange()">
+    <span class="flag-icon flag-icon-{{lang}}"></span>
+    {{lang}}
+  </mat-option>
 </mat-select>

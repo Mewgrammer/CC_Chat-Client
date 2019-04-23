@@ -1,12 +1,13 @@
 import {Injectable} from '@angular/core';
-import {ChatRoom} from '../Models/chat-room';
+import {ChatRoom, IChatRoom} from '../Models/chat-room';
 import {Subject} from 'rxjs';
-import {Message, MessageType} from '../Models/message';
+import {IMessage, Message, MessageType} from '../Models/message';
 import {LoginPayload, MessagePayload, JoinPayload, ChatRoomChangePayload, MoodPayload} from '../Models/payloads';
 import * as io from 'socket.io-client';
 import {User} from '../Models/user';
 import {HttpClient, HttpErrorResponse} from '@angular/common/http';
 import {UploadedFile} from '../Models/uploaded-file';
+import {TranslationService} from './translation.service';
 
 @Injectable({
   providedIn: 'root'
@@ -57,7 +58,7 @@ export class ChatService{
     return (this.Connected || this.Connecting) && this._user != null && this.Username.length > 0 && this._loggedIn;
   }
 
-  constructor(private http: HttpClient) {
+  constructor(private _translateService: TranslationService, private http: HttpClient) {
     this.currentRoomChanged = new Subject<ChatRoom>();
     this.userNameChanged = new Subject<string>();
     this.chatRoomChanged = new Subject<ChatRoom>();
@@ -170,6 +171,7 @@ export class ChatService{
         this._currentChatRoom.messages.push(msg);
       });
       this.currentRoomChanged.next({...this._currentChatRoom});
+      this.translateMessagesOfChatRoom(payload.messages, this._currentChatRoom);
     });
     this._socket.on("handshake", (payload: any) => {
       console.log("Socket IO Server handshake complete", payload);
@@ -196,6 +198,8 @@ export class ChatService{
       this._user = payload.user;
       this.configureSocketIOConnection();
       this._loggedIn = true;
+      if(payload.user.language)
+        this._translateService.Language = payload.user.language;
       this._chatRooms = [...payload.chatRooms];
       this.onChatRoomsUpdated([...this._chatRooms]);
     }
@@ -238,6 +242,8 @@ export class ChatService{
         this._user = payload.user;
         this.configureSocketIOConnection();
         this._loggedIn = true;
+        if(payload.user.language)
+          this._translateService.Language = payload.user.language;
         this._chatRooms = [...payload.chatRooms];
         this.onChatRoomsUpdated([...this._chatRooms]);
       }
@@ -308,5 +314,24 @@ export class ChatService{
   private onChatRoomsUpdated(rooms: ChatRoom[]) {
       this._chatRooms = rooms;
       this.chatRoomsChanged.next(rooms);
+  }
+
+  private async translateMessagesOfChatRoom(messages: IMessage[], room: IChatRoom) {
+    try {
+      if(this._currentChatRoom.id != room.id) return;
+      messages.filter(x => x.sender.id !== this.User.id).forEach(async (msg) => {
+        const translation = await this._translateService.translate(this.User, msg);
+        const originalMsgRef = this._currentChatRoom.messages.find(m => m.id == msg.id);
+        originalMsgRef.content = translation.translations[0].translation;
+      });
+      this.currentRoomChanged.next({...this._currentChatRoom});
+    }
+    catch (e) {
+      console.error("Translation of messages failed:", e);
+    }
+  }
+
+  public async translateMessage(message: IMessage) {
+    return await this._translateService.translate(this.User, message);
   }
 }

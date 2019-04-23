@@ -1,28 +1,79 @@
 import { Injectable } from '@angular/core';
-import {Translator} from '../resources/translator';
 import {IMessage} from '../Models/message';
 import {IUser} from '../Models/user';
+import {environment} from '../../environments/environment';
+import {HttpClient, HttpHeaders, HttpParams} from '@angular/common/http';
+import {IdentifiableLanguage, IdentifiedLanguages, TranslationResult} from '../resources/interfaces';
 
 @Injectable({
   providedIn: 'root'
 })
 export class TranslationService {
 
-  private readonly _translator: Translator;
+  private _languages: IdentifiableLanguage[] = [];
+  private _targetLanguage: string = "de";
 
-  public get Translator() {
-    return this._translator;
+  public get Language() {
+    return this._targetLanguage;
+  }
+
+  public set Language(lang: string) {
+    this._targetLanguage = lang;
+  }
+
+  constructor(private _http: HttpClient) {
+
   }
 
   public get Languages() {
-    return this._translator.getSupportedLanguages();
+    return this.getSupportedLanguages();
   }
 
-  constructor() {
-    this._translator = new Translator();
+  private get AuthHeader() {
+    let headers = new HttpHeaders();
+    headers = headers.append("Authorization", "Basic " + btoa("apikey:" + environment.translatorApiKey));
+    return headers;
   }
 
-  public translate(receiver: IUser, message: IMessage) {
-
+  private get HttpParams() {
+    return  new HttpParams().set('version', environment.translatorVersion);
   }
+
+  public async getSupportedLanguages(): Promise<IdentifiableLanguage[]> {
+    if(this._languages.length == 0) {
+      const url = environment.translatorUrl + "/identifiable_languages";
+      const header = this.AuthHeader.append('Content-Type', 'application/json');
+      this._languages = (await this._http.get(url, {
+        headers: header,
+        params: this.HttpParams
+      }).toPromise()) as IdentifiableLanguage[];
+      console.log("Identifiable Languages:", this._languages);
+    }
+    return this._languages;
+  }
+
+  public async identifyLanguage(text: string): Promise<IdentifiedLanguages> {
+    let header = this.AuthHeader.append('Content-Type', 'text/plain');
+    const url = environment.translatorUrl + "/identify";
+    return (await this._http.post(url, text, {
+      headers: header,
+      params: this.HttpParams
+    }).toPromise()) as IdentifiedLanguages;
+  }
+
+  public async translate(receiver: IUser, message: IMessage) {
+    const sourceLangRanking = await this.identifyLanguage(message.content);
+    console.log("Identified Languages for '" + message.content + "'", sourceLangRanking);
+    const header = this.AuthHeader.append('Content-Type', 'application/json');
+    const url = environment.translatorUrl + "/translate";
+    const body = {
+      text: [message.content],
+      source: sourceLangRanking.languages[0].language,
+      target: receiver.language
+    };
+    console.log("Translating", body);
+    return (await this._http.post(url, body, {
+      headers: header,
+      params: this.HttpParams
+    }).toPromise()) as TranslationResult;  }
 }
