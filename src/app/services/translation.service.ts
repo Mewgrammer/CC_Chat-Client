@@ -3,7 +3,7 @@ import {IMessage} from '../Models/message';
 import {IUser} from '../Models/user';
 import {environment} from '../../environments/environment';
 import {HttpClient, HttpHeaders, HttpParams} from '@angular/common/http';
-import {IdentifiableLanguage, IdentifiedLanguages, TranslationResult} from '../resources/interfaces';
+import {IdentifiableLanguage, IdentifiableLanguages, IdentifiedLanguages, TranslationResult} from '../resources/interfaces';
 
 @Injectable({
   providedIn: 'root'
@@ -41,13 +41,18 @@ export class TranslationService {
 
   public async getSupportedLanguages(): Promise<IdentifiableLanguage[]> {
     if(this._languages.length == 0) {
-      const url = environment.translatorUrl + "/identifiable_languages";
-      const header = this.AuthHeader.append('Content-Type', 'application/json');
-      this._languages = (await this._http.get(url, {
-        headers: header,
-        params: this.HttpParams
-      }).toPromise()) as IdentifiableLanguage[];
-      console.log("Identifiable Languages:", this._languages);
+      try{
+        const url = environment.translatorUrl + "/identifiable_languages";
+        const header = this.AuthHeader.append('Content-Type', 'application/json');
+        this._languages = ((await this._http.get(url, {
+          headers: header,
+          params: this.HttpParams
+        }).toPromise()) as IdentifiableLanguages).languages;
+        console.log("Identifiable Languages:", this._languages);
+      }
+      catch (e) {
+        console.error("Getting identifiable languages failed:", e);
+      }
     }
     return this._languages;
   }
@@ -69,7 +74,7 @@ export class TranslationService {
     const body = {
       text: [message.content],
       source: sourceLangRanking.languages[0].language,
-      target: receiver.language
+      target: this._targetLanguage
     };
     console.log("Translating", body);
     return (await this._http.post(url, body, {

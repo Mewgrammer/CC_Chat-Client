@@ -12,7 +12,7 @@
         <input #fileInput type="file" (change)="onFileInput()" style="display: none" [multiple]="false" accept="image/*" />
       </div>
       <div class="row">
-        <mat-form-field class="ml-2 w-50 ml-auto mr-auto">
+        <mat-form-field class="w-50 ml-auto mr-auto">
           <input matInput
                  #usernameInput
                  name="username"
@@ -23,7 +23,7 @@
         </mat-form-field>
       </div>
       <div class="row">
-        <mat-form-field class="ml-2 w-50 ml-auto mr-auto">
+        <mat-form-field class="w-50 ml-auto mr-auto">
           <input matInput
                  type="password"
                  #passwordInput
@@ -40,9 +40,9 @@
           </span>
       </div>
       <div class="row">
-        <app-language-picker></app-language-picker>
+        <app-language-picker class="w-50 ml-auto mr-auto"></app-language-picker>
       </div>
-      <div class="row">
+      <div class="row mt-2">
         <button mat-raised-button type="submit" color="primary" class="ml-auto mr-auto justify-content-center w-25"> Register  </button>
       </div>
     </form>
