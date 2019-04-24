@@ -8,6 +8,7 @@ import {User} from '../Models/user';
 import {HttpClient, HttpErrorResponse} from '@angular/common/http';
 import {UploadedFile} from '../Models/uploaded-file';
 import {TranslationService} from './translation.service';
+import * as CryptoJS from 'crypto-js';
 
 @Injectable({
   providedIn: 'root'
@@ -228,7 +229,7 @@ export class ChatService{
   public async login(username: string, password: string) {
     const body = {
       name: username,
-      password: password,
+      password: this.encryptPassword(password),
     };
     console.log("Login", body);
     const url = this._serverUrl + "/login";
@@ -261,7 +262,7 @@ export class ChatService{
   public async register(username: string, password: string, profileImage: File) {
     const body = {
       name: username,
-      password: password,
+      password: this.encryptPassword(password),
     };
     console.log("register", body);
     const url = this._serverUrl + "/register";
@@ -281,6 +282,12 @@ export class ChatService{
       console.warn("Register Failed :", e);
       this.registrationFailed.next("Registration failed - ");
     }
+  }
+
+  public encryptPassword(password: string): string {
+    const key = '5tr3ng&Gehe1m';
+    const encryptedPassword = CryptoJS.SHA256(password, CryptoJS.AES.encrypt(password, key));
+    return encryptedPassword.toString();
   }
 
   public sendMessage(room: ChatRoom, message: string, attachments: UploadedFile[] = []) {
