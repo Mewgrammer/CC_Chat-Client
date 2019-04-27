@@ -2,7 +2,7 @@ import {AfterViewChecked, AfterViewInit, Component, ElementRef, Input, OnDestroy
 import {ChatService} from '../../services/chat.service';
 import {ChatRoom} from '../../Models/chat-room';
 import {Subscription} from 'rxjs';
-import {Message, MessageType} from '../../Models/message';
+import {Message, MessageType, IMessage} from '../../Models/message';
 import {User} from '../../Models/user';
 import {MatList} from '@angular/material';
 import {UploadedFile} from '../../Models/uploaded-file';
@@ -93,6 +93,11 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewInit, AfterVie
       }
     }
     // this.sendFile(this.files);
+  }
+
+  public onMessageClick(message: IMessage) {
+    const msg = this._chatRoom.messages.find(m => m.id == message.id);
+    msg.showTranslated = !msg.showTranslated;
   }
 
   onRemoveAttachment(file: File) {

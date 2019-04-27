@@ -8,6 +8,7 @@ import {IdentifiableLanguage, IdentifiableLanguages, IdentifiedLanguages, Transl
 @Injectable({
   providedIn: 'root'
 })
+//OBSOLETE - DIDNT WORK ... THANKs CORS!!!!
 export class TranslationService {
 
   private _languages: IdentifiableLanguage[] = [];
@@ -46,6 +47,7 @@ export class TranslationService {
         const header = this.AuthHeader.append('Content-Type', 'application/json');
         this._languages = ((await this._http.get(url, {
           headers: header,
+          withCredentials: true,
           params: this.HttpParams
         }).toPromise()) as IdentifiableLanguages).languages;
         console.log("Identifiable Languages:", this._languages);
@@ -62,6 +64,7 @@ export class TranslationService {
     const url = environment.translatorUrl + "/identify";
     return (await this._http.post(url, text, {
       headers: header,
+      withCredentials: true,
       params: this.HttpParams
     }).toPromise()) as IdentifiedLanguages;
   }
@@ -79,6 +82,7 @@ export class TranslationService {
     console.log("Translating", body);
     return (await this._http.post(url, body, {
       headers: header,
+      withCredentials: true,
       params: this.HttpParams
     }).toPromise()) as TranslationResult;  }
 }

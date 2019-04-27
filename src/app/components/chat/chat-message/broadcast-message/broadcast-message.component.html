@@ -9,8 +9,11 @@
     <b>{{message.sender.name}}</b>&nbsp;&nbsp;
   </div>
   <div mat-line>
-    <span>
+    <span *ngIf="!message.showTranslated || !message.translatedContent || message.translatedContent.length == 0">
       {{message.content}}
+    </span>
+    <span *ngIf="message.showTranslated && message.translatedContent &&  message.translatedContent.length > 0">
+      {{message.translatedContent}}
     </span>
     <app-message-attachments *ngIf="message.attachments.length > 0" [message]="message"></app-message-attachments>
   </div>

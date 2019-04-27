@@ -12,26 +12,29 @@ import {MatSelectChange} from '@angular/material';
 })
 export class LanguagePickerComponent implements OnInit {
 
-  public language: IdentifiableLanguage;
-  public languages: IdentifiableLanguage[] =  [];
+  public language: IdentifiableLanguage = {
+    language: "de",
+    name: "German"
+  };
 
-  constructor(private _translationService: TranslationService, private _chatService: ChatService) {
+  public get Languages() {
+    return this._chatService.Languages;
   }
 
-  async ngOnInit() {
-    this.languages = IDENTIFYABLE_LANGUAGES.languages;
-    this.language = this.languages.find(l => l.language == this._translationService.Language);
-    console.log("initial Language:", this.language);
-    this.languages = await this._translationService.Languages;
-    if(this.languages.length == 0) {
-      this.languages = [ this.language];
-    }
-    console.log("Languages:", this.languages);
+  constructor(private _chatService: ChatService) {
+
+  }
+
+  ngOnInit() {
+    this._chatService.languageChanged.subscribe( (lang) => {
+      this.language = this.Languages.find(l => l.language == lang.language);
+    });
+    this.language = this.Languages.find(l => l.language == this._chatService.Language);
   }
 
   onSelectionChange($event: MatSelectChange) {
     console.log("Lang changed to ", this.language);
-    this._translationService.Language = this.language.language;
+    this._chatService.changeLanguage(this.language.language);
   }
 
   public getLanguageIconClass(lang: IdentifiableLanguage) {

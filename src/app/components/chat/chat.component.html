@@ -5,7 +5,7 @@
   <mat-card-content class="h-100">
     <div #chatMessagesContainer style="height: 500px; overflow: hidden; overflow-y: scroll">
       <div class="row" *ngFor="let msg of Messages">
-        <app-chat-message class="w-100" [message]="msg"></app-chat-message>
+        <app-chat-message class="w-100" [message]="msg" (click)="onMessageClick(msg)"></app-chat-message>
       </div>
     </div>
   </mat-card-content>
