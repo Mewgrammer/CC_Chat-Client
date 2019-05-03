@@ -8,6 +8,7 @@
     "start-server": "node ./dist/server.js",
     "start": "ng serve --host 0.0.0.0 --port 443 --ssl --ssl-key ./ssl/certificates/privatekey.pem  --ssl-cert ./ssl/certificate.crt",
     "build": "ng build && cpx manifest.yml dist && cpx ./ssl/**/*.* dist/ssl && npm run build-server",
+    "build-prod": "ng build --prod=true --aot=true && cpx manifest.yml dist && cpx ./ssl/**/*.* dist/ssl && npm run build-server",
     "build-server": "npx tsc ./server/server.ts --outdir ./dist",
     "build:ssr": "ng run chat-client:server:dev",
     "test": "ng test",
