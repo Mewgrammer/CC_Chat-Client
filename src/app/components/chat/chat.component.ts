@@ -15,10 +15,10 @@ import {UploadedFile} from '../../Models/uploaded-file';
 export class ChatComponent implements OnInit, OnDestroy, AfterViewInit, AfterViewChecked {
 
   @ViewChild("chatMessagesContainer")
-  _chatMessagesContainer: ElementRef;
+  public _chatMessagesContainer: ElementRef;
 
   @ViewChild("fileInput")
-  _fileInput: ElementRef;
+  public _fileInput: ElementRef;
 
   public files: File[] = [];
 
@@ -35,12 +35,13 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewInit, AfterVie
   public get Users() {
     return this._chatRoom.users.filter( u => u.id != this.chatService.User.id);
   }
+
   private _chatRoom: ChatRoom;
   private _chatRoomSubscription: Subscription;
   receivers = [];
   isPrivateMessage = false;
   message = '';
-  constructor(protected chatService: ChatService) { }
+  constructor(public chatService: ChatService) { }
 
   ngOnInit() {
     this._chatRoomSubscription = this.chatService.chatRoomChanged.subscribe((room) => {

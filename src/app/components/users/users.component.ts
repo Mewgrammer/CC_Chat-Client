@@ -9,14 +9,14 @@ import {EMood, IUser, User} from '../../Models/user';
   styleUrls: ["./users.component.css"]
 })
 export class UsersComponent implements OnInit {
-  private users: User[] = [];
+  public users: User[] = [];
   private currentRoomSubscription: Subscription;
 
   public get Moods() {
     return EMood;
   }
 
-  constructor(protected chatService: ChatService) {}
+  constructor(public chatService: ChatService) {}
 
   ngOnInit() {
     this.currentRoomSubscription = this.chatService.currentRoomChanged.subscribe(

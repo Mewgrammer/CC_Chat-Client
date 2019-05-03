@@ -8,9 +8,10 @@ import {Subscription} from 'rxjs';
   styleUrls: ["./login.component.scss"]
 })
 export class LoginComponent implements OnInit {
-  private username = "";
-  private password = ""
-  private errorMsg = "";
+  public username = "";
+  public password = ""
+  public errorMsg = "";
+
   private loginRefusedSubscription: Subscription;
   private connectionLostSubscription: Subscription;
   private connectionEstablishedSubscription: Subscription;

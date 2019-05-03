@@ -7,7 +7,7 @@ import {ChatService} from '../../services/chat.service';
   styleUrls: ["./header.component.css"]
 })
 export class HeaderComponent implements OnInit {
-  constructor(protected chatService: ChatService) {}
+  constructor(public chatService: ChatService) {}
 
   ngOnInit() {}
 }
