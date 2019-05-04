@@ -3,6 +3,6 @@ applications:
     memory: 512M
     host: mew-client-dev
     buildpack: https://github.com/cloudfoundry/nodejs-buildpack
-    command: npm start
+    command: yarn start
 
 
