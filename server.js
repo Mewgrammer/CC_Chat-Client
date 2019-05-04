@@ -30,7 +30,7 @@ const secureOptions = {
 };
 
 app.use(cors(corsOptions));
-app.use(express.static(path.join(__dirname, "dist")));
+app.use(express.static(path.join(__dirname)));
 app.use(helmet());
 app.use(secure);
 app.use(hsts({
