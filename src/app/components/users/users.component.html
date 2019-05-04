@@ -7,7 +7,7 @@
     <mat-list>
       <mat-list-item class="mat-elevation-z1" *ngFor="let user of users">
         <div class="row">
-          <img mat-card-avatar *ngIf="UserHasAvatar(user)" [src]="UserAvatarUrl(user)" height="35" width="35" [alt]="user.name"/>
+          <img mat-card-avatar *ngIf="UserHasAvatar(user)" [src]="UserAvatarUrl(user)" height="35" width="35" [alt]="user.name" (error)="onImageLoadError(user)"/>
           <avatar mat-card-avatar *ngIf="!UserHasAvatar(user)" [name]="user.name" [displayType]="'circle'" [size]="35"></avatar>
           <span [ngClass]="{'pl-2': true, 'font-weight-bold': chatService.isCurrentUser(user)}" style="font-size: 16px;">
             {{user.name}}

@@ -41,4 +41,8 @@ export class UsersComponent implements OnInit {
   public getMoodIconClass(user: IUser) {
     return (user.mood == EMood.Unhappy ? "far fa-sad-cry text-danger" : user.mood == EMood.Happy ? "far fa-laugh-beam text-success" : "");
   }
+
+  public onImageLoadError(user: IUser) {
+    user.profilePictureLink = null;
+  }
 }
