@@ -5,11 +5,11 @@
   "author": "Michael Mew, Andreas Natter",
   "scripts": {
     "ng": "ng",
-    "start": "node server.js",
+    "start": "npm run build && node server.js",
     "start-dev": "ng serve --host 0.0.0.0 --port 80",
     "start-ssl": "ng serve --host 0.0.0.0 --port 443 --ssl --ssl-key ./ssl/certificates/privatekey.pem  --ssl-cert ./ssl/certificate.crt",
     "build": "ng build && cpx manifest.yml dist && cpx ./ssl/**/*.* dist/ssl",
-    "build-prod": "ng build --prod=true --aot=true && cpx manifest.yml dist && cpx ./ssl/**/*.* dist/ssl && npm run build-server",
+    "build-prod": "ng build --prod=true --aot=true && cpx manifest.yml dist && cpx ./ssl/**/*.* dist/ssl",
     "build:ssr": "ng run chat-client:server:dev",
     "test": "ng test",
     "lint": "ng lint",
