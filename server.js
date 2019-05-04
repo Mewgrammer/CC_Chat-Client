@@ -29,21 +29,28 @@ const secureOptions = {
   rejectUnauthorized: false,
 };
 
-app.use(cors(corsOptions));
-app.use(express.static(path.join(__dirname)));
-app.use(helmet());
-app.use(secure);
-app.use(hsts({
-  maxAge: 15552000  // 180 days in seconds
-}));
-app.get("/*", (req, res) => {
-  res.sendFile(path.join(__dirname));
-});
+try {
+  app.use(cors(corsOptions));
+  app.use(express.static(path.join(__dirname)));
+  app.use(helmet());
+  app.use(secure);
+  app.use(hsts({
+    maxAge: 15552000  // 180 days in seconds
+  }));
+  app.get("/*", (req, res) => {
+    res.sendFile(path.join(__dirname));
+  });
 
-const server = http.createServer(app);
-server.listen(port, () => console.log("HTTP-Server listening on Port %s", port));
+  const server = http.createServer(app);
+  server.listen(port, () => console.log("HTTP-Server listening on Port %s", port));
 
-const secureServer = https.createServer(secureOptions, app);
-secureServer.listen(httpsPort, () => {
-  console.log("HTTPS-Server listening on Port %s", httpsPort)
-});
+  const secureServer = https.createServer(secureOptions, app);
+  secureServer.listen(httpsPort, () => {
+    console.log("HTTPS-Server listening on Port %s", httpsPort)
+  });
+
+}
+catch(err) {
+  console.error("Server crashed!", err);
+}
+
