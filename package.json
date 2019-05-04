@@ -7,10 +7,10 @@
   "scripts": {
     "ng": "ng",
     "start": "npm run build-prod && node server.js",
-    "start-dev": "npx ng serve --host 0.0.0.0 --port 80",
-    "start-ssl": "npx ng serve --host 0.0.0.0 --port 443 --ssl --ssl-key ./ssl/certificates/privatekey.pem  --ssl-cert ./ssl/certificate.crt",
+    "start-dev": "ng serve --host 0.0.0.0 --port 80",
+    "start-ssl": "ng serve --host 0.0.0.0 --port 443 --ssl --ssl-key ./ssl/certificates/privatekey.pem  --ssl-cert ./ssl/certificate.crt",
     "build": "ng build && cpx manifest.yml dist && cpx ./ssl/**/*.* dist/ssl",
-    "build-prod": "npx ng build --prod=true --aot=true && cpx manifest.yml dist && cpx ./ssl/**/*.* dist/ssl && cpx server.js dist",
+    "build-prod": "ng build --prod=true --aot=true && cpx manifest.yml dist && cpx ./ssl/**/*.* dist/ssl && cpx server.js dist",
     "build:ssr": "npx ng run chat-client:server:dev",
     "test": "ng test",
     "lint": "ng lint",

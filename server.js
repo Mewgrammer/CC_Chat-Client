@@ -11,8 +11,8 @@ const cors = require("cors");
 
 
 const app = express();
-const port = process.env.PORT || 80;
-const httpsPort = process.env.HTTPS_PORT || 443;
+const port = process.env.PORT || 8080;
+const httpsPort = process.env.HTTPS_PORT || 8443;
 const corsOptions = {
   origin: (origin, callback) => {
       callback(null, true);
