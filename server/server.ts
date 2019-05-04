@@ -31,12 +31,16 @@ export class ChatServer {
     this._app.use(cors(this._corsOptions));
     this._app.use(secure);
     this._app.use(helmet());
+    this._app.use(helmet.contentSecurityPolicy({
+      directives: {
+        defaultSrc: ["'self'"]
+      }
+    }))
     this._app.use(hsts({
       maxAge: 15552000  // 180 days in seconds
     }))
     this._app.use(express.static(__dirname));
     this._app.get("/*", (req, res) => {
-      console.log("get");
       res.sendFile(__dirname);
     });
     this._server = http.createServer(this._app);
