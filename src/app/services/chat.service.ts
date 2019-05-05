@@ -228,6 +228,9 @@ export class ChatService{
       if(this._chatRooms.length > 0) {
         this.changeChatRoom(this._chatRooms[0]);
       }
+      else {
+        console.warn("No ChatRooms ! - cannot join any");
+      }
     });
     console.log("Event-Listeners registered");
   }
@@ -364,7 +367,8 @@ export class ChatService{
   }
 
   public changeChatRoom(room: ChatRoom) {
-    if(this._currentChatRoom != null && this._currentChatRoom.name === room.name) return;
+    // if(this._currentChatRoom != null && this._currentChatRoom.name === room.name) return;
+    console.log("Joining ChatRoom", room)
     this._socket.emit("join", {
       user: this._user,
       chatRoomId: room.id
