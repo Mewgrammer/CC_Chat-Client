@@ -1,7 +1,7 @@
 applications:
   - name: cc-chat-client
     memory: 512M
-    host: mew-client-dev
+    host: mew-client
     buildpack: https://github.com/cloudfoundry/nodejs-buildpack
     command: node dist/server.js
 
