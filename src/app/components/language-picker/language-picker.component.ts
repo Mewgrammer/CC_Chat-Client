@@ -18,10 +18,33 @@ export class LanguagePickerComponent implements OnInit {
   };
 
   public get Languages() {
-    return this._chatService.Languages;
+    return this._chatService.Languages.filter(l => this.languageMapping.has(l.language));
   }
 
+  private languageMapping: Map<string, string> = new Map();
+
+
   constructor(private _chatService: ChatService) {
+
+  }
+
+  private mapLanguageTags() {
+    this.languageMapping.set("af", "za");
+    this.languageMapping.set("ar", "ae");
+    this.languageMapping.set("de", "de");
+    this.languageMapping.set("en", "gb");
+    this.languageMapping.set("tr", "tr");
+    this.languageMapping.set("sw", "sw");
+    this.languageMapping.set("fr", "fr");
+    this.languageMapping.set("fi", "fi");
+    this.languageMapping.set("hu", "hu");
+    this.languageMapping.set("it", "it");
+    this.languageMapping.set("pl", "pl");
+    this.languageMapping.set("ja", "jp");
+    this.languageMapping.set("cs", "cz");
+    this.languageMapping.set("es", "es");
+    this.languageMapping.set("nl", "nl");
+    this.languageMapping.set("pt", "pt");
 
   }
 
@@ -30,6 +53,7 @@ export class LanguagePickerComponent implements OnInit {
       this.language = this.Languages.find(l => l.language == lang.language);
     });
     this.language = this.Languages.find(l => l.language == this._chatService.Language);
+    this.mapLanguageTags();
   }
 
   onSelectionChange($event: MatSelectChange) {
@@ -38,6 +62,12 @@ export class LanguagePickerComponent implements OnInit {
   }
 
   public getLanguageIconClass(lang: IdentifiableLanguage) {
-    return "flag-icon flag-icon-" + lang.language;
+    if(lang != null) {
+      const languageIdentifier = this.languageMapping.get(lang.language);
+      return "flag-icon flag-icon-" + languageIdentifier;
+    }
   }
+
+
+
 }

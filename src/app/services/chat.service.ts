@@ -179,6 +179,9 @@ export class ChatService{
     });
     this._socket.on("server-info", (payload: ServerInfoPayload) => {
       this._languages = payload.supportedLanguages;
+      const targetLang = payload.supportedLanguages.find(l => l.language == (this.LoggedIn ? this.User.language : "de"));
+      this._targetLanguage = targetLang.language;
+      this.languageChanged.next(targetLang);
       console.log("Received Server-Info", payload);
     });
     this._socket.on("join", (chatRoom: ChatRoom) => {
@@ -310,8 +313,9 @@ export class ChatService{
     }
     catch (e) {
       console.warn("Login Failed :", e);
+      const err = e as HttpErrorResponse;
       this._loggedIn = false;
-      this.loginRefused.next("Login failed");
+      this.loginRefused.next(err.error.result);
     }
   }
 
@@ -335,8 +339,9 @@ export class ChatService{
       await this.login(username, password);
     }
     catch (e) {
+      const err = e as HttpErrorResponse;
       console.warn("Register Failed :", e);
-      this.registrationFailed.next("Registration failed - ");
+      this.registrationFailed.next("Registration failed - " + err.error);
     }
   }
 

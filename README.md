@@ -2,9 +2,13 @@
 
 This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 7.3.5.
 
+## Production server
+
+Run `npm start` for a express-based production server. Navigate to `http://localhost:8080/`.
+
 ## Development server
 
-Run `ng serve` for a dev server. Navigate to `http://localhost:4200/`. The app will automatically reload if you change any of the source files.
+Run `ng serve --port 80` or `npm run dev` for a dev server. Navigate to `http://localhost/`. The app will automatically reload if you change any of the source files.
 
 ## Code scaffolding
 
