@@ -16,6 +16,7 @@ export class RegisterComponent implements OnInit {
   public username = "";
   public password = "";
   public errorMsg = "";
+  public loading = false;
 
 
   @ViewChild("fileInput")
@@ -51,7 +52,16 @@ export class RegisterComponent implements OnInit {
 
   async onSubmit() {
     this.errorMsg = "";
-    await this.register(this.username, this.password);
+    try{
+      this.loading = true;
+      await this.register(this.username, this.password);
+    }
+    catch(err) {
+      console.error("error on Register Submit", err);
+    }
+    finally {
+      this.loading = false;
+    }
   }
 
   async register(username: string, password: string) {

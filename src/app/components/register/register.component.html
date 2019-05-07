@@ -34,6 +34,9 @@
                  required>
         </mat-form-field>
       </div>
+      <div *ngIf="loading">
+        <mat-progress-bar mode="indeterminate"></mat-progress-bar>
+      </div>
       <div class="row" *ngIf="ErrorMessage.length > 0">
           <span class="ml-auto mr-auto text-danger" >
             {{ErrorMessage}}
