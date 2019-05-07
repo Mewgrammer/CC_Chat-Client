@@ -11,6 +11,7 @@ export class LoginComponent implements OnInit {
   public username = "";
   public password = ""
   public errorMsg = "";
+  public loading = false;
 
   private loginRefusedSubscription: Subscription;
   private connectionLostSubscription: Subscription;
@@ -46,7 +47,17 @@ export class LoginComponent implements OnInit {
 
   async onSubmit() {
     this.errorMsg = "";
-    await this.login(this.username, this.password);
+    try{
+      this.loading = true;
+      await this.login(this.username, this.password);
+
+    }
+    catch(err) {
+      console.error("error on Login Submit", err);
+    }
+    finally {
+      this.loading = false;
+    }
   }
 
   async login(username: string, password: string) {

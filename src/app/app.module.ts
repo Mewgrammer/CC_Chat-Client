@@ -12,7 +12,7 @@ import {
   MatListModule,
   MatSelectModule,
   MatToolbarModule,
-  MatSidenavModule, MatTabsModule, MatTooltipModule
+  MatSidenavModule, MatTabsModule, MatTooltipModule, MatProgressBarModule
 } from '@angular/material';
 import {ChatComponent} from './components/chat/chat.component';
 import {RoomsComponent} from './components/rooms/rooms.component';
@@ -65,6 +65,7 @@ import {AvatarModule} from 'ng2-avatar';
     MatButtonModule,
     MatSidenavModule,
     MatCheckboxModule,
+    MatProgressBarModule,
     MatSelectModule,
     MatListModule,
     MatIconModule,
