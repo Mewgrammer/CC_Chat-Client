@@ -1,18 +1,21 @@
+import { LanguageChangePayload, ServerInfoPayload, TranslationPayload } from './../Models/payloads';
 import {Injectable} from '@angular/core';
-import {ChatRoom} from '../Models/chat-room';
+import {ChatRoom, IChatRoom} from '../Models/chat-room';
 import {Subject} from 'rxjs';
-import {Message, MessageType} from '../Models/message';
+import {IMessage, Message, MessageType} from '../Models/message';
 import {LoginPayload, MessagePayload, JoinPayload, ChatRoomChangePayload, MoodPayload} from '../Models/payloads';
 import * as io from 'socket.io-client';
 import {User} from '../Models/user';
 import {HttpClient, HttpErrorResponse} from '@angular/common/http';
 import {UploadedFile} from '../Models/uploaded-file';
+import {TranslationService} from './translation.service';
+import * as CryptoJS from 'crypto-js';
+import { IdentifiableLanguage } from '../resources/interfaces';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ChatService{
-
   private _currentChatRoom: ChatRoom;
   private _chatRooms: ChatRoom[] = [];
   private _user: User = null;
@@ -20,6 +23,14 @@ export class ChatService{
   private _socket: SocketIOClient.Socket;
   private _connecting = false;
   private _serverUrl = "https://mew-server.eu-de.mybluemix.net";
+  private _languages: IdentifiableLanguage[] = [
+    {
+      language: "de",
+      name: "German"
+    }
+  ];
+  private _targetLanguage: string = "de";
+
 
   public currentRoomChanged: Subject<ChatRoom>;
   public userNameChanged: Subject<string>;
@@ -27,6 +38,7 @@ export class ChatService{
   public chatRoomChanged: Subject<ChatRoom>;
   public loginRefused: Subject<string>;
   public registrationFailed: Subject<string>;
+  public languageChanged: Subject<IdentifiableLanguage>;
 
   public connectionEstablished: Subject<void>;
   public connectionLost: Subject<void>;
@@ -56,6 +68,12 @@ export class ChatService{
   public get LoggedIn() {
     return (this.Connected || this.Connecting) && this._user != null && this.Username.length > 0 && this._loggedIn;
   }
+  public get Language() {
+    return this._targetLanguage;
+  }
+  public get Languages() {
+    return this._languages;
+  }
 
   constructor(private http: HttpClient) {
     this.currentRoomChanged = new Subject<ChatRoom>();
@@ -65,6 +83,7 @@ export class ChatService{
     this.loginRefused = new Subject<string>();
     this.registrationFailed = new Subject<string>();
     this.connectionLost = new Subject<void>();
+    this.languageChanged = new Subject<IdentifiableLanguage>();
     this.connectionEstablished = new Subject<void>();
     const serverUrl = localStorage.getItem("server-url");
     if(serverUrl != null && serverUrl != "") {
@@ -80,7 +99,11 @@ export class ChatService{
       this.disconnect();
     }
     localStorage.setItem("server-url", serverUrl);
-    this._socket = io(this._serverUrl);
+    this._socket = io(this._serverUrl, {
+      secure: true,
+      transports: ['websocket'],
+      rejectUnauthorized: false
+    });
     this.initEventListeners();
   }
 
@@ -94,6 +117,17 @@ export class ChatService{
 
   public isCurrentUser(user: User) {
     return user != null && this.User != null && user.id == this.User.id && user.name == this.Username
+  }
+
+  public changeLanguage(language: string) {
+    this._targetLanguage = language;
+    this.languageChanged.next(this.Languages.find(l => l.language == language));
+    if(!this.User) return;
+    const payload: LanguageChangePayload = {
+      userId: this.User.id,
+      language: language
+    };
+    this._socket.emit("change-language", payload);
   }
 
   public async uploadFiles(files: File[]): Promise<UploadedFile[]> {
@@ -143,9 +177,17 @@ export class ChatService{
       console.log("Socket Disconnected", x);
       this._socket = io("http://localhost:8080");
     });
+    this._socket.on("server-info", (payload: ServerInfoPayload) => {
+      this._languages = payload.supportedLanguages;
+      const targetLang = payload.supportedLanguages.find(l => l.language == (this.LoggedIn ? this.User.language : "de"));
+      this._targetLanguage = targetLang.language;
+      this.languageChanged.next(targetLang);
+      console.log("Received Server-Info", payload);
+    });
     this._socket.on("join", (chatRoom: ChatRoom) => {
       this._currentChatRoom = chatRoom;
       this._currentChatRoom.messages.forEach(msg => msg.read = true);
+      this._currentChatRoom.messages.forEach(msg => msg.showTranslated = true);
       this.currentRoomChanged.next(chatRoom);
     });
     this._socket.on("moodChanged", (payload: MoodPayload) => {
@@ -167,14 +209,30 @@ export class ChatService{
         this._currentChatRoom.users = [...payload.users];
       }
       payload.messages.forEach(msg => {
-        this._currentChatRoom.messages.push(msg);
+        this._currentChatRoom.messages.push({...msg, showTranslated: true});
       });
       this.currentRoomChanged.next({...this._currentChatRoom});
+      // this.translateMessagesOfChatRoom(payload.messages, this._currentChatRoom);
+    });
+    this._socket.on("message-translated", (payload: TranslationPayload) => {
+      const message = this._currentChatRoom.messages.find(m => m.id == payload.messageId);
+      if(message != null) {
+        // message.content = payload.translatedContent;
+        message.showTranslated = true;
+        message.translatedContent = payload.translatedContent;
+        console.log("Message translated", message);
+      }
+      else {
+        console.warn("Translated Message not found in CurrentChatRoom", this.CurrentChatRoom.messages);
+      }
     });
     this._socket.on("handshake", (payload: any) => {
       console.log("Socket IO Server handshake complete", payload);
       if(this._chatRooms.length > 0) {
         this.changeChatRoom(this._chatRooms[0]);
+      }
+      else {
+        console.warn("No ChatRooms ! - cannot join any");
       }
     });
     console.log("Event-Listeners registered");
@@ -196,6 +254,10 @@ export class ChatService{
       this._user = payload.user;
       this.configureSocketIOConnection();
       this._loggedIn = true;
+      if(payload.user.language) {
+        this._targetLanguage = payload.user.language;
+        this.languageChanged.next(this.Languages.find(l => l.language == this._targetLanguage));
+      }
       this._chatRooms = [...payload.chatRooms];
       this.onChatRoomsUpdated([...this._chatRooms]);
     }
@@ -224,7 +286,7 @@ export class ChatService{
   public async login(username: string, password: string) {
     const body = {
       name: username,
-      password: password,
+      password: this.encryptPassword(password),
     };
     console.log("Login", body);
     const url = this._serverUrl + "/login";
@@ -238,6 +300,10 @@ export class ChatService{
         this._user = payload.user;
         this.configureSocketIOConnection();
         this._loggedIn = true;
+        if(payload.user.language) {
+          this._targetLanguage = payload.user.language;
+          this.languageChanged.next(this.Languages.find(l => l.language == this._targetLanguage));
+        }
         this._chatRooms = [...payload.chatRooms];
         this.onChatRoomsUpdated([...this._chatRooms]);
       }
@@ -247,15 +313,16 @@ export class ChatService{
     }
     catch (e) {
       console.warn("Login Failed :", e);
+      const err = e as HttpErrorResponse;
       this._loggedIn = false;
-      this.loginRefused.next("Login failed");
+      this.loginRefused.next(err.error.result);
     }
   }
 
   public async register(username: string, password: string, profileImage: File) {
     const body = {
       name: username,
-      password: password,
+      password: this.encryptPassword(password),
     };
     console.log("register", body);
     const url = this._serverUrl + "/register";
@@ -272,9 +339,16 @@ export class ChatService{
       await this.login(username, password);
     }
     catch (e) {
+      const err = e as HttpErrorResponse;
       console.warn("Register Failed :", e);
-      this.registrationFailed.next("Registration failed - ");
+      this.registrationFailed.next("Registration failed - " + err.error);
     }
+  }
+
+  public encryptPassword(password: string): string {
+    const key = '5tr3ng&Gehe1m';
+    const encryptedPassword = CryptoJS.SHA256(password, CryptoJS.AES.encrypt(password, key));
+    return encryptedPassword.toString();
   }
 
   public sendMessage(room: ChatRoom, message: string, attachments: UploadedFile[] = []) {
@@ -298,7 +372,8 @@ export class ChatService{
   }
 
   public changeChatRoom(room: ChatRoom) {
-    if(this._currentChatRoom != null && this._currentChatRoom.name === room.name) return;
+    // if(this._currentChatRoom != null && this._currentChatRoom.name === room.name) return;
+    console.log("Joining ChatRoom", room)
     this._socket.emit("join", {
       user: this._user,
       chatRoomId: room.id
@@ -309,4 +384,25 @@ export class ChatService{
       this._chatRooms = rooms;
       this.chatRoomsChanged.next(rooms);
   }
+
+  /*
+  private async translateMessagesOfChatRoom(messages: IMessage[], room: IChatRoom) {
+    try {
+      if(this._currentChatRoom.id != room.id) return;
+      messages.filter(x => x.sender.id !== this.User.id).forEach(async (msg) => {
+        const translation = await this._translateService.translate(this.User, msg);
+        const originalMsgRef = this._currentChatRoom.messages.find(m => m.id == msg.id);
+        originalMsgRef.content = translation.translations[0].translation;
+      });
+      this.currentRoomChanged.next({...this._currentChatRoom});
+    }
+    catch (e) {
+      console.error("Translation of messages failed:", e);
+    }
+  }
+
+  public async translateMessage(message: IMessage) {
+    return await this._translateService.translate(this.User, message);
+  }
+  */
 }

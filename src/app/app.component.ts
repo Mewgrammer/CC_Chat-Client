@@ -14,11 +14,11 @@ export class AppComponent {
   @ViewChild("snav")
   private sideNav: MatSidenav;
 
-  protected rooms: ChatRoom[] = [];
+  public rooms: ChatRoom[] = [];
   private chatRoomsSubscription: Subscription;
 
 
-  constructor(protected chatService: ChatService) {
+  constructor(public chatService: ChatService) {
     // this.chatService.login("AutoLogin-" + new Date().toString())
   }
 

@@ -9,15 +9,15 @@ import {ChatService} from '../../services/chat.service';
 })
 export class ConnectComponent implements OnInit {
 
-  private serverUrl = "";
-  private errorMsg = "";
+  public serverUrl = "";
+  public errorMsg = "";
   private connectionLostSubscription: Subscription;
 
   public get ErrorMessage() {
     return this.errorMsg;
   }
 
-  constructor(protected chatService: ChatService) {}
+  constructor(public chatService: ChatService) {}
 
   ngOnInit() {
     this.serverUrl = this.chatService.ServerUrl;

@@ -29,6 +29,7 @@ import {HttpClientModule} from '@angular/common/http';
 import { MessageAttachmentsComponent } from './components/chat/chat-message/message-attachments/message-attachments.component';
 import { ConnectComponent } from './components/connect/connect.component';
 import { RegisterComponent } from './components/register/register.component';
+import { LanguagePickerComponent } from './components/language-picker/language-picker.component';
 import {AvatarModule} from 'ng2-avatar';
 
 @NgModule({
@@ -46,6 +47,7 @@ import {AvatarModule} from 'ng2-avatar';
     MessageAttachmentsComponent,
     ConnectComponent,
     RegisterComponent,
+    LanguagePickerComponent,
   ],
   imports: [
     HttpClientModule,

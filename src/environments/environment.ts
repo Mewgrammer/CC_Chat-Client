@@ -3,7 +3,10 @@
 // The list of file replacements can be found in `angular.json`.
 
 export const environment = {
-  production: false
+  production: false,
+  translatorApiKey: "gaQPEtSVegqesAPN6gXT-iPnhn7-AblpW4ePaYlBfHep",
+  translatorUrl: "https://gateway-fra.watsonplatform.net/language-translator/api/v3",
+  translatorVersion: "2018-05-01",
 };
 
 /*

@@ -31,7 +31,7 @@ export class RegisterComponent implements OnInit {
   constructor(protected chatService: ChatService) {}
 
   ngOnInit() {
-    this.RegistrationFailedSubscription = this.chatService.loginRefused.subscribe(
+    this.RegistrationFailedSubscription = this.chatService.registrationFailed.subscribe(
       msg => {
         this.errorMsg = msg;
       }

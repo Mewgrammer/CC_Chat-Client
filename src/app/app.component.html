@@ -2,11 +2,14 @@
   <mat-toolbar class="w-100" color="primary">
     <div class="w-100">
       <div class="row w-100">
-        <div class="col-10">
+        <div class="col-7">
         <button mat-icon-button *ngIf="chatService.LoggedIn" color="primary" class="justify-content-start float-left text-white ml-2" (click)="onToggleSideNav()">
           <mat-icon>menu</mat-icon>
         </button>
         <span class="ml-2 justify-content-between float-left">Chat App</span>
+        </div>
+        <div class="col-3">
+          <app-language-picker class="w-100"></app-language-picker>
         </div>
         <div class="col-2">
           <button mat-flat-button *ngIf="chatService.LoggedIn" (click)="logout()">Logout</button>

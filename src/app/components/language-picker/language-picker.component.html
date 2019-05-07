@@ -1,0 +1,14 @@
+<div class="row">
+  <div class="col-2">
+    <span class="{{getLanguageIconClass(language)}}" (click)="langSelect.toggle()"></span>
+  </div>
+  <div class="col-10">
+    <mat-select #langSelect [(ngModel)]="language" placeholder="Language" (selectionChange)="onSelectionChange($event)">
+      <mat-option *ngFor="let lang of Languages" [value]="lang">
+        <span class="{{getLanguageIconClass(lang)}}"></span>
+        {{lang.name}}
+      </mat-option>
+    </mat-select>
+  </div>
+</div>
+

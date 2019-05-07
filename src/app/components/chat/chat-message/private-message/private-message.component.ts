@@ -15,7 +15,7 @@ export class PrivateMessageComponent implements OnInit {
   }
   public message: Message;
 
-  constructor(protected chatService: ChatService) { }
+  constructor(public chatService: ChatService) { }
 
 
   ngOnInit() {

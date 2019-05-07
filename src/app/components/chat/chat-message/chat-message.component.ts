@@ -1,3 +1,4 @@
+import { IMessage } from './../../../Models/message';
 import {Component, Input, OnInit} from '@angular/core';
 import {Message, MessageType} from '../../../Models/message';
 import {ChatService} from '../../../services/chat.service';
@@ -19,9 +20,11 @@ export class ChatMessageComponent implements OnInit {
   }
 
   public message: Message;
-  constructor(protected chatService: ChatService) { }
+  constructor(public chatService: ChatService) { }
 
   ngOnInit() {
   }
+
+
 
 }

@@ -9,7 +9,7 @@ import {Subscription} from 'rxjs';
   styleUrls: ["./rooms.component.css"]
 })
 export class RoomsComponent implements OnInit {
-  private rooms: ChatRoom[] = [];
+  public rooms: ChatRoom[] = [];
   private chatRoomsSubscription: Subscription;
 
   constructor(protected chatService: ChatService) {}
