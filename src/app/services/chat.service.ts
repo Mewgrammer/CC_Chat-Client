@@ -277,6 +277,10 @@ export class ChatService{
         withCredentials: true,
         headers: { 'Content-Type': 'application/json' },
       }).toPromise();
+      this._socket.emit("leave", {
+        user: this._user,
+        chatRoomId: this._currentChatRoom.id
+      });
       this._loggedIn = false;
     }
     catch (e) {
