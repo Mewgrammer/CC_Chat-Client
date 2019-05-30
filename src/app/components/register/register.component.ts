@@ -43,6 +43,11 @@ export class RegisterComponent implements OnInit {
     if(this._fileInput.nativeElement.files && this._fileInput.nativeElement.files[0]) {
       const files: { [key: string]: File } = this._fileInput.nativeElement.files;
       this.file = files[0];
+      if(this.file.size > this.chatService.FileSizeLimitBytes) {
+        this._fileInput.nativeElement.files = [];
+        this.errorMsg = "File Size limit is 80kb !";
+        return;
+      }
       const reader = new FileReader();
       reader.onload = e => this.imgSrc = <string>reader.result;
       reader.readAsDataURL(this.file);

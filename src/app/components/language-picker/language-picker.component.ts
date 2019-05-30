@@ -1,5 +1,4 @@
 import { Component, OnInit } from '@angular/core';
-import {TranslationService} from '../../services/translation.service';
 import {ChatService} from '../../services/chat.service';
 import {IDENTIFYABLE_LANGUAGES} from '../../resources/testData';
 import {IdentifiableLanguage, IdentifiedLanguage} from '../../resources/interfaces';

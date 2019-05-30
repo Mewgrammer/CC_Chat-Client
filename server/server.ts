@@ -8,7 +8,7 @@ const hsts = require('hsts');
 const helmet = require('helmet');
 
 export class ChatServer {
-  private _defaultPort = 8080;
+  private _defaultPort = 80;
   private _app: express.Application;
   private _server: http.Server;
   private _port: string | number;
