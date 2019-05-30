@@ -5,7 +5,7 @@ export enum EMood {
 }
 
 export interface IUser {
-  id: string;
+  id: number;
   name: string;
   password: string;
   mood: EMood;
@@ -17,7 +17,7 @@ export class User implements IUser {
   public mood: EMood = EMood.Neutral;
   public profilePictureLink: string;
   public language: string = "de";
-  constructor(public id: string, public name: string, public password: string) {
+  constructor(public id: number, public name: string, public password: string) {
 
   }
 }

@@ -8,8 +8,6 @@ import * as io from 'socket.io-client';
 import {User} from '../Models/user';
 import {HttpClient, HttpErrorResponse} from '@angular/common/http';
 import {UploadedFile} from '../Models/uploaded-file';
-import {TranslationService} from './translation.service';
-import * as CryptoJS from 'crypto-js';
 import { IdentifiableLanguage } from '../resources/interfaces';
 
 @Injectable({
@@ -31,7 +29,7 @@ export class ChatService{
   ];
   private _targetLanguage: string = "de";
 
-
+  public FileSizeLimitBytes = 80000;
   public currentRoomChanged: Subject<ChatRoom>;
   public userNameChanged: Subject<string>;
   public chatRoomsChanged: Subject<ChatRoom[]>;
@@ -102,7 +100,6 @@ export class ChatService{
     this._socket = io(this._serverUrl, {
       secure: true,
       transports: ['websocket'],
-      rejectUnauthorized: false
     });
     this.initEventListeners();
   }
@@ -207,6 +204,11 @@ export class ChatService{
       if(this._currentChatRoom.id !== payload.roomId) return;
       if(payload.users != null && payload.users.length > 0) {
         this._currentChatRoom.users = [...payload.users];
+        this._currentChatRoom.users.forEach(u => {
+          if(u.profilePictureLink.length == 0) {
+            u.profilePictureLink = "/images/profile-picture-" + u.id + ".jpg";
+          }
+        })
       }
       payload.messages.forEach(msg => {
         this._currentChatRoom.messages.push({...msg, showTranslated: true});
@@ -286,7 +288,7 @@ export class ChatService{
   public async login(username: string, password: string) {
     const body = {
       name: username,
-      password: this.encryptPassword(password),
+      password: password,
     };
     console.log("Login", body);
     const url = this._serverUrl + "/login";
@@ -322,7 +324,7 @@ export class ChatService{
   public async register(username: string, password: string, profileImage: File) {
     const body = {
       name: username,
-      password: this.encryptPassword(password),
+      password: password,
     };
     console.log("register", body);
     const url = this._serverUrl + "/register";
@@ -343,12 +345,6 @@ export class ChatService{
       console.warn("Register Failed :", e);
       this.registrationFailed.next("Registration failed - " + err.error);
     }
-  }
-
-  public encryptPassword(password: string): string {
-    const key = '5tr3ng&Gehe1m';
-    const encryptedPassword = CryptoJS.SHA256(password, CryptoJS.AES.encrypt(password, key));
-    return encryptedPassword.toString();
   }
 
   public sendMessage(room: ChatRoom, message: string, attachments: UploadedFile[] = []) {
@@ -373,7 +369,7 @@ export class ChatService{
 
   public changeChatRoom(room: ChatRoom) {
     // if(this._currentChatRoom != null && this._currentChatRoom.name === room.name) return;
-    console.log("Joining ChatRoom", room)
+    console.log("Joining ChatRoom", room);
     this._socket.emit("join", {
       user: this._user,
       chatRoomId: room.id
@@ -385,24 +381,4 @@ export class ChatService{
       this.chatRoomsChanged.next(rooms);
   }
 
-  /*
-  private async translateMessagesOfChatRoom(messages: IMessage[], room: IChatRoom) {
-    try {
-      if(this._currentChatRoom.id != room.id) return;
-      messages.filter(x => x.sender.id !== this.User.id).forEach(async (msg) => {
-        const translation = await this._translateService.translate(this.User, msg);
-        const originalMsgRef = this._currentChatRoom.messages.find(m => m.id == msg.id);
-        originalMsgRef.content = translation.translations[0].translation;
-      });
-      this.currentRoomChanged.next({...this._currentChatRoom});
-    }
-    catch (e) {
-      console.error("Translation of messages failed:", e);
-    }
-  }
-
-  public async translateMessage(message: IMessage) {
-    return await this._translateService.translate(this.User, message);
-  }
-  */
 }
