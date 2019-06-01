@@ -240,7 +240,12 @@ export class ChatService{
     this._socket.on("handshake", (payload: any) => {
       console.log("Socket IO Server handshake complete", payload);
       if(this._chatRooms.length > 0) {
-        this.changeChatRoom(this._chatRooms[0]);
+        if(this._currentChatRoom != null) {
+          this.changeChatRoom(this._currentChatRoom);
+        }
+        else {
+          this.changeChatRoom(this._chatRooms[0]);
+        }
       }
       else {
         console.warn("No ChatRooms ! - cannot join any");
