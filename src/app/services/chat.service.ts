@@ -273,14 +273,14 @@ export class ChatService{
     console.log("Logout");
     const url = this._serverUrl + "/logout";
     try {
-      await this.http.post(url, JSON.stringify({}), {
-        withCredentials: true,
-        headers: { 'Content-Type': 'application/json' },
-      }).toPromise();
       this._socket.emit("leave", {
         user: this._user,
         chatRoomId: this._currentChatRoom.id
       });
+      await this.http.post(url, JSON.stringify({}), {
+        withCredentials: true,
+        headers: { 'Content-Type': 'application/json' },
+      }).toPromise();
       this._loggedIn = false;
     }
     catch (e) {
