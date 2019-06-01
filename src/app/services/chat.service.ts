@@ -226,16 +226,18 @@ export class ChatService{
       // this.translateMessagesOfChatRoom(payload.messages, this._currentChatRoom);
     });
     this._socket.on("message-translated", (payload: TranslationPayload) => {
-      const message = this._currentChatRoom.messages.find(m => m.id == payload.messageId);
-      if(message != null) {
-        // message.content = payload.translatedContent;
-        message.showTranslated = true;
-        message.translatedContent = payload.translatedContent;
-        console.log("Message translated", message);
-      }
-      else {
-        console.warn("Translated Message not found in CurrentChatRoom", this.CurrentChatRoom.messages);
-      }
+      const messages = this._currentChatRoom.messages.filter(m => m.sender.id == payload.message.sender.id && payload.message.content == m.content);
+      messages.forEach(message => {
+        if(message != null) {
+          // message.content = payload.translatedContent;
+          message.showTranslated = true;
+          message.translatedContent = payload.translatedContent;
+          console.log("Message translated", message);
+        }
+        else {
+          console.warn("Translated Message not found in CurrentChatRoom", this.CurrentChatRoom.messages);
+        }
+      });
     });
     this._socket.on("handshake", (payload: any) => {
       console.log("Socket IO Server handshake complete", payload);

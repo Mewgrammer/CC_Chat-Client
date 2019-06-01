@@ -41,7 +41,7 @@ export interface LanguageChangePayload {
 }
 
 export interface TranslationPayload {
-  messageId: number,
+  message: Message,
   translatedContent: string;
 }
 
