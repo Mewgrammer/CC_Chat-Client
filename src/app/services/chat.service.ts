@@ -18,6 +18,7 @@ export class ChatService{
   private _chatRooms: ChatRoom[] = [];
   private _user: User = null;
   private _loggedIn = false;
+  private _connected = false;
   private _socket: SocketIOClient.Socket;
   private _connecting = false;
   private _serverUrl = "https://mew-server.eu-de.mybluemix.net";
@@ -28,6 +29,7 @@ export class ChatService{
     }
   ];
   private _targetLanguage: string = "de";
+  private _userCredentials: {name: string, password: string};
 
   public FileSizeLimitBytes = 80000;
   public currentRoomChanged: Subject<ChatRoom>;
@@ -37,7 +39,6 @@ export class ChatService{
   public loginRefused: Subject<string>;
   public registrationFailed: Subject<string>;
   public languageChanged: Subject<IdentifiableLanguage>;
-
   public connectionEstablished: Subject<void>;
   public connectionLost: Subject<void>;
 
@@ -45,7 +46,7 @@ export class ChatService{
     return this._serverUrl;
   }
   public get Connected() {
-    return this._socket != null && this._socket.connected;
+    return this._connected;
   }
   public  get Connecting() {
     return this._connecting;
@@ -64,7 +65,7 @@ export class ChatService{
     return this._user.name;
   }
   public get LoggedIn() {
-    return (this.Connected || this.Connecting) && this._user != null && this.Username.length > 0 && this._loggedIn;
+    return this._loggedIn;
   }
   public get Language() {
     return this._targetLanguage;
@@ -101,6 +102,7 @@ export class ChatService{
       secure: true,
       transports: ['websocket'],
     });
+    this._connected = this._socket.connected;
     this.initEventListeners();
   }
 
@@ -110,6 +112,7 @@ export class ChatService{
     this._socket.close();
     this._socket = null;
     this._connecting = false;
+    this._connected = false;
   }
 
   public isCurrentUser(user: User) {
@@ -154,28 +157,34 @@ export class ChatService{
   private initEventListeners(): void {
     this._socket.io.on("connect_error", (err) => {
       console.warn("Socket connection failed", err);
-      this._loggedIn = false;
       this.connectionLost.next();
+      this.tryRestoreConnection();
     });
     this._socket.io.on("reconnect_error", (err) => {
       console.warn("Socket reconnection failed", err);
-      this._loggedIn = false;
       this.connectionLost.next();
+      this.tryRestoreConnection();
     });
     this._socket.io.on("reconnect", () => {
       console.log("Socket reconnection successful");
+      this._connected = true;
       this.connectionEstablished.next();
     });
     this._socket.io.on("connect", () => {
       console.log("Socket connection established");
+      this._connected = true;
       this.connectionEstablished.next();
     });
     this._socket.on("disconnect", (x) => {
       console.log("Socket Disconnected", x);
-      this._socket = io("http://localhost:8080");
+      this.tryRestoreConnection();
     });
-    this._socket.on("server-info", (payload: ServerInfoPayload) => {
+    this._socket.on("server-info", async (payload: ServerInfoPayload) => {
+      this._connected = true;
       this._languages = payload.supportedLanguages;
+      if(this._userCredentials != null) {
+        await this.login(this._userCredentials.name, this._userCredentials.password);
+      }
       const targetLang = payload.supportedLanguages.find(l => l.language == (this.LoggedIn ? this.User.language : "de"));
       this._targetLanguage = targetLang.language;
       this.languageChanged.next(targetLang);
@@ -244,6 +253,19 @@ export class ChatService{
     this._socket.emit("configure", this._user.id);
   }
 
+  private tryRestoreConnection() {
+    if(this._socket != null) {
+      this._socket.disconnect();
+      this._socket.close();
+    }
+    this._socket = io(this._serverUrl, {
+      secure: true,
+      transports: ['websocket'],
+    });
+    this._connected = this._socket.connected;
+    this.initEventListeners();
+  }
+
   public async autoLogin() {
     console.log("Auto-Login");
     const url = this._serverUrl + "/login";
@@ -265,7 +287,6 @@ export class ChatService{
     }
     catch (e) {
       console.warn("Auto-Login Failed :", e);
-      this._loggedIn = false;
     }
   }
 
@@ -294,6 +315,7 @@ export class ChatService{
       name: username,
       password: password,
     };
+    this._userCredentials = {...body};
     console.log("Login", body);
     const url = this._serverUrl + "/login";
     try {
@@ -320,7 +342,6 @@ export class ChatService{
     catch (e) {
       console.warn("Login Failed :", e);
       const err = e as HttpErrorResponse;
-      this._loggedIn = false;
       this.loginRefused.next(err.error.result);
     }
   }
